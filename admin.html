@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amigos à Mesa — Painel</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0D0D0D;color:#F0E8D5;font-family:'Inter',sans-serif;font-weight:300;min-height:100vh}
+
+/* ---- LOGIN ---- */
+#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1.5rem;padding:2rem}
+.login-logo{font-family:'Cormorant Garamond',serif;font-size:1.8rem;color:#B8963E;text-align:center}
+.login-sub{font-size:10px;color:#444;letter-spacing:.2em;text-transform:uppercase}
+.login-box{width:100%;max-width:320px;border:1px solid #1e1e1e;padding:2rem}
+.login-box label{font-size:10px;color:#555;letter-spacing:.1em;text-transform:uppercase;display:block;margin-bottom:.4rem}
+.login-box input{width:100%;background:#0D0D0D;border:1px solid #222;color:#F0E8D5;font-family:'Inter',sans-serif;font-size:.875rem;padding:.8rem 1rem;outline:none;margin-bottom:1rem;transition:border-color .2s}
+.login-box input:focus{border-color:#B8963E}
+.login-btn{width:100%;background:transparent;border:1px solid #B8963E;color:#B8963E;font-family:'Inter',sans-serif;font-size:10px;letter-spacing:.2em;text-transform:uppercase;padding:.85rem;cursor:pointer;transition:all .3s}
+.login-btn:hover{background:#B8963E;color:#0D0D0D}
+.login-err{font-size:10px;color:#8B2020;text-align:center;display:none}
+
+/* ---- DASHBOARD ---- */
+#dashboard{display:none}
+.top-bar{display:flex;align-items:center;justify-content:space-between;padding:1.2rem 2rem;border-bottom:1px solid #1a1a1a;background:#0a0a0a}
+.top-bar-title{font-family:'Cormorant Garamond',serif;font-size:1.3rem;color:#B8963E}
+.top-bar-right{display:flex;align-items:center;gap:1.5rem}
+.top-bar-date{font-size:10px;color:#444;letter-spacing:.1em}
+.logout-btn{font-size:9px;color:#444;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;border:none;background:none;transition:color .2s}
+.logout-btn:hover{color:#B8963E}
+.main{padding:2rem;max-width:1100px;margin:0 auto}
+
+/* KPI CARDS */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1px;background:#1a1a1a;margin-bottom:2rem}
+.kpi-card{background:#0a0a0a;padding:1.4rem 1.6rem}
+.kpi-label{font-size:9px;color:#444;letter-spacing:.2em;text-transform:uppercase;margin-bottom:.5rem}
+.kpi-value{font-family:'Cormorant Garamond',serif;font-size:2.2rem;color:#F0E8D5;font-weight:300}
+.kpi-value.gold{color:#B8963E}
+.kpi-sub{font-size:10px;color:#444;margin-top:.2rem}
+
+/* TOOLBAR */
+.toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;gap:1rem;flex-wrap:wrap}
+.toolbar-left{display:flex;gap:.5rem;flex-wrap:wrap}
+.filter-btn{font-size:9px;letter-spacing:.12em;text-transform:uppercase;padding:.5rem 1rem;border:1px solid #222;color:#555;background:transparent;cursor:pointer;transition:all .2s}
+.filter-btn:hover,.filter-btn.active{border-color:#B8963E;color:#B8963E}
+.search-input{background:#0a0a0a;border:1px solid #222;color:#F0E8D5;font-family:'Inter',sans-serif;font-size:.8rem;padding:.5rem .9rem;outline:none;min-width:200px;transition:border-color .2s}
+.search-input:focus{border-color:#B8963E}
+.search-input::placeholder{color:#444}
+.refresh-btn{font-size:9px;letter-spacing:.12em;text-transform:uppercase;padding:.5rem 1.2rem;border:1px solid #B8963E;color:#B8963E;background:transparent;cursor:pointer;transition:all .2s}
+.refresh-btn:hover{background:#B8963E;color:#0D0D0D}
+
+/* TABLE */
+.table-wrap{overflow-x:auto;border:1px solid #1a1a1a}
+table{width:100%;border-collapse:collapse;min-width:700px}
+thead th{background:#0a0a0a;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:#555;padding:.85rem 1rem;text-align:left;border-bottom:1px solid #1a1a1a;white-space:nowrap}
+tbody tr{border-bottom:1px solid #111;transition:background .15s}
+tbody tr:hover{background:#0f0f0f}
+tbody td{padding:.8rem 1rem;font-size:.82rem;color:#ccc;white-space:nowrap}
+tbody td.name{color:#F0E8D5;font-weight:400}
+tbody td.sinal{color:#B8963E;font-family:'Cormorant Garamond',serif;font-size:1rem}
+.status-badge{display:inline-block;font-size:8px;letter-spacing:.1em;text-transform:uppercase;padding:.25rem .7rem;border:1px solid}
+.status-badge.pending{border-color:#555;color:#555}
+.status-badge.confirmed{border-color:#4a7c4a;color:#4a7c4a}
+.status-badge.cancelled{border-color:#7c2a2a;color:#7c2a2a}
+.action-btn{font-size:8px;letter-spacing:.1em;text-transform:uppercase;padding:.3rem .7rem;border:1px solid #333;color:#555;background:transparent;cursor:pointer;transition:all .2s;margin-left:.3rem}
+.action-btn:hover{border-color:#B8963E;color:#B8963E}
+.action-btn.confirm{border-color:#4a7c4a;color:#4a7c4a}
+.action-btn.confirm:hover{background:#4a7c4a;color:#0D0D0D}
+.action-btn.cancel{border-color:#7c2a2a;color:#7c2a2a}
+.action-btn.cancel:hover{background:#7c2a2a;color:#F0E8D5}
+.empty-state{text-align:center;padding:3rem;color:#333;font-size:.9rem}
+.loading-state{text-align:center;padding:2rem;color:#444;font-size:10px;letter-spacing:.1em;text-transform:uppercase}
+
+/* CALENDAR MINI */
+.section-title-sm{font-family:'Cormorant Garamond',serif;font-size:1.3rem;color:#F0E8D5;margin:2rem 0 1rem}
+.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:#1a1a1a;border:1px solid #1a1a1a}
+.cal-header{background:#0a0a0a;text-align:center;padding:.5rem;font-size:8px;color:#444;letter-spacing:.1em;text-transform:uppercase}
+.cal-day{background:#0a0a0a;min-height:64px;padding:.5rem;position:relative;cursor:default}
+.cal-day.other-month{background:#080808}
+.cal-day.today .cal-num{color:#B8963E}
+.cal-day.has-reserva{background:#0f0e0a}
+.cal-num{font-size:.75rem;color:#555;margin-bottom:.3rem}
+.cal-dot{width:6px;height:6px;border-radius:50%;background:#B8963E;display:inline-block;margin:1px}
+.cal-count{font-size:8px;color:#B8963E;margin-top:.2rem}
+
+@media(max-width:600px){
+  .main{padding:1rem}
+  .top-bar{padding:.8rem 1rem}
+  .toolbar{flex-direction:column;align-items:stretch}
+  .search-input{min-width:auto;width:100%}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div>
+    <div class="login-logo">#amigosamesa</div>
+    <p class="login-sub" style="text-align:center;margin-top:.4rem">painel de gestão</p>
+  </div>
+  <div class="login-box">
+    <label>Senha de acesso</label>
+    <input type="password" id="pwd-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" onclick="doLogin()">Entrar</button>
+    <p class="login-err" id="login-err">Senha incorreta</p>
+  </div>
+  <p style="font-size:9px;color:#2a2a2a;letter-spacing:.1em">Amigos à Mesa · Acesso restrito</p>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+  <div class="top-bar">
+    <span class="top-bar-title">#amigosamesa — painel</span>
+    <div class="top-bar-right">
+      <span class="top-bar-date" id="today-str"></span>
+      <button class="logout-btn" onclick="doLogout()">Sair</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <!-- KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Total de reservas</div>
+        <div class="kpi-value" id="kpi-total">—</div>
+        <div class="kpi-sub">todas</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Confirmadas</div>
+        <div class="kpi-value gold" id="kpi-conf">—</div>
+        <div class="kpi-sub">com sinal pago</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Pendentes</div>
+        <div class="kpi-value" id="kpi-pend">—</div>
+        <div class="kpi-sub">aguardando comprovante</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Receita de sinais</div>
+        <div class="kpi-value gold" id="kpi-rev">—</div>
+        <div class="kpi-sub">somente confirmadas</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Pessoas este mês</div>
+        <div class="kpi-value" id="kpi-pess">—</div>
+        <div class="kpi-sub">confirmadas</div>
+      </div>
+    </div>
+
+    <!-- TOOLBAR -->
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <button class="filter-btn active" onclick="setFilter('all',this)">Todas</button>
+        <button class="filter-btn" onclick="setFilter('pending',this)">Pendentes</button>
+        <button class="filter-btn" onclick="setFilter('confirmed',this)">Confirmadas</button>
+        <button class="filter-btn" onclick="setFilter('cancelled',this)">Canceladas</button>
+      </div>
+      <div style="display:flex;gap:.5rem">
+        <input type="text" class="search-input" id="search-input" placeholder="Buscar por nome..." oninput="renderTable()">
+        <button class="refresh-btn" onclick="loadData()">↺ Atualizar</button>
+      </div>
+    </div>
+
+    <!-- TABELA -->
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Nome</th>
+            <th>WhatsApp</th>
+            <th>Data</th>
+            <th>Horário</th>
+            <th>Pessoas</th>
+            <th>Sinal</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+
+    <!-- CALENDÁRIO -->
+    <h2 class="section-title-sm">Visão do mês</h2>
+    <div class="calendar-grid" id="cal-header-row"></div>
+    <div class="calendar-grid" id="cal-body" style="margin-top:1px"></div>
+
+  </div>
+</div>
+
+<script>
+// =============================================
+// CONFIGURAÇÃO
+// =============================================
+const ADMIN_PWD    = 'amigos2026';            // Troque pela senha desejada
+const SHEETS_URL   = 'https://script.google.com/macros/s/AKfycbxjbGwYZBSNJMjpjvzXiYAcN_CmezQ5FkekIT9YAJD1rjtgziiShc5Lar_Ju21aW1xD1w/exec'; // Mesma URL do index.html
+// =============================================
+
+let allData = [];
+let currentFilter = 'all';
+
+// Dados de exemplo para demonstração
+const DEMO_DATA = [
+  {id:1,nome:'Ana Souza',wpp:'11991234567',pessoas:4,data:'2025-07-05',hora:'Jantar — 20h',obs:'Aniversário',sinal:300,status:'confirmed',timestamp:'2025-06-28T19:23:00'},
+  {id:2,nome:'Bruno Lima',wpp:'11987654321',pessoas:2,data:'2025-07-06',hora:'Almoço — 13h',obs:'',sinal:150,status:'pending',timestamp:'2025-06-29T10:11:00'},
+  {id:3,nome:'Carla Mendes',wpp:'11999887766',pessoas:6,data:'2025-07-12',hora:'Jantar — 19h',obs:'Sem glúten',sinal:450,status:'confirmed',timestamp:'2025-06-29T14:55:00'},
+  {id:4,nome:'Diego Rocha',wpp:'11955443322',pessoas:3,data:'2025-07-19',hora:'Jantar — 20h',obs:'',sinal:225,status:'pending',timestamp:'2025-06-30T09:00:00'},
+];
+
+function doLogin(){
+  const pwd = document.getElementById('pwd-input').value;
+  if(pwd === ADMIN_PWD){
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('dashboard').style.display='block';
+    init();
+  }else{
+    document.getElementById('login-err').style.display='block';
+    document.getElementById('pwd-input').value='';
+  }
+}
+
+function doLogout(){
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('dashboard').style.display='none';
+  document.getElementById('pwd-input').value='';
+  document.getElementById('login-err').style.display='none';
+}
+
+function init(){
+  const now=new Date();
+  document.getElementById('today-str').textContent=now.toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'});
+  loadData();
+  buildCalendarHeader();
+}
+
+async function loadData(){
+  document.getElementById('tbody').innerHTML='<tr><td colspan="9" class="loading-state">Carregando...</td></tr>';
+  if(SHEETS_URL==='SUA_URL_DO_APPS_SCRIPT'){
+    allData=[...DEMO_DATA];
+    setTimeout(()=>{updateKPIs();renderTable();buildCalendar();},600);
+    return;
+  }
+  try{
+    const r=await fetch(SHEETS_URL+'?action=list');
+    const d=await r.json();
+    allData=d.data||[];
+  }catch(e){
+    allData=[...DEMO_DATA];
+  }
+  updateKPIs();renderTable();buildCalendar();
+}
+
+function updateKPIs(){
+  const conf=allData.filter(r=>r.status==='confirmed');
+  const pend=allData.filter(r=>r.status==='pending');
+  const now=new Date();
+  const thisMonth=conf.filter(r=>{const d=new Date(r.data||r.timestamp);return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();});
+  document.getElementById('kpi-total').textContent=allData.length;
+  document.getElementById('kpi-conf').textContent=conf.length;
+  document.getElementById('kpi-pend').textContent=pend.length;
+  const rev=conf.reduce((a,r)=>a+(r.sinal||0),0);
+  document.getElementById('kpi-rev').textContent='R$\u00a0'+rev.toLocaleString('pt-BR');
+  document.getElementById('kpi-pess').textContent=thisMonth.reduce((a,r)=>a+(parseInt(r.pessoas)||0),0);
+}
+
+function setFilter(f,btn){
+  currentFilter=f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTable();
+}
+
+function renderTable(){
+  const q=document.getElementById('search-input').value.toLowerCase();
+  let rows=allData.filter(r=>{
+    if(currentFilter!=='all'&&r.status!==currentFilter)return false;
+    if(q&&!(r.nome||'').toLowerCase().includes(q))return false;
+    return true;
+  });
+  const tbody=document.getElementById('tbody');
+  if(!rows.length){tbody.innerHTML='<tr><td colspan="9" class="empty-state">Nenhuma reserva encontrada</td></tr>';return;}
+  tbody.innerHTML=rows.map((r,i)=>`
+    <tr>
+      <td style="color:#333">${r.id||i+1}</td>
+      <td class="name">${r.nome||'—'}</td>
+      <td><a href="https://wa.me/55${(r.wpp||'').replace(/\D/g,'')}" target="_blank" style="color:#B8963E;text-decoration:none">${r.wpp||'—'}</a></td>
+      <td>${r.data||'—'}</td>
+      <td>${r.hora||'—'}</td>
+      <td style="text-align:center">${r.pessoas||'—'}</td>
+      <td class="sinal">R$\u00a0${(r.sinal||0).toLocaleString('pt-BR')}</td>
+      <td><span class="status-badge ${r.status||'pending'}">${r.status==='confirmed'?'confirmada':r.status==='cancelled'?'cancelada':'pendente'}</span></td>
+      <td>
+        ${r.status!=='confirmed'?`<button class="action-btn confirm" onclick="setStatus(${r.id||i},'confirmed')">Confirmar</button>`:''}
+        ${r.status!=='cancelled'?`<button class="action-btn cancel" onclick="setStatus(${r.id||i},'cancelled')">Cancelar</button>`:''}
+      </td>
+    </tr>
+  `).join('');
+}
+
+function setStatus(id,status){
+  const row=allData.find(r=>r.id===id);
+  if(row){row.status=status;}
+  updateKPIs();renderTable();buildCalendar();
+  if(SHEETS_URL!=='SUA_URL_DO_APPS_SCRIPT'){
+    fetch(SHEETS_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'update',id,status})}).catch(()=>{});
+  }
+}
+
+function buildCalendarHeader(){
+  const days=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  const hdr=document.getElementById('cal-header-row');
+  hdr.innerHTML=days.map(d=>`<div class="cal-header">${d}</div>`).join('');
+}
+
+function buildCalendar(){
+  const now=new Date();
+  const year=now.getFullYear(),month=now.getMonth();
+  const first=new Date(year,month,1);
+  const last=new Date(year,month+1,0);
+  const startDay=first.getDay();
+  const totalCells=Math.ceil((startDay+last.getDate())/7)*7;
+  const body=document.getElementById('cal-body');
+  const todayStr=now.toISOString().split('T')[0];
+
+  // mapa de reservas por data
+  const resMap={};
+  allData.filter(r=>r.status!=='cancelled').forEach(r=>{
+    if(r.data){resMap[r.data]=(resMap[r.data]||0)+1;}
+  });
+
+  let html='';
+  for(let i=0;i<totalCells;i++){
+    const dayNum=i-startDay+1;
+    const isOther=dayNum<1||dayNum>last.getDate();
+    const dateStr=isOther?'':year+'-'+String(month+1).padStart(2,'0')+'-'+String(dayNum).padStart(2,'0');
+    const isToday=dateStr===todayStr;
+    const count=resMap[dateStr]||0;
+    html+=`<div class="cal-day${isOther?' other-month':''}${isToday?' today':''}${count?' has-reserva':''}">
+      ${isOther?'':(`<div class="cal-num">${dayNum}</div>`+(count?`<div>${Array(Math.min(count,5)).fill('<span class="cal-dot"></span>').join('')}</div><div class="cal-count">${count} reserva${count>1?'s':''}</div>`:''))}
+    </div>`;
+  }
+  body.innerHTML=html;
+}
+</script>
+</body>
+</html>
